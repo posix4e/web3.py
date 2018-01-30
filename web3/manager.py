@@ -92,10 +92,14 @@ class RequestManager(object):
         """
         response = self._make_request(method, params)
 
+        if "result" in response:
+            result = response['result']
+            return result
+
         if "error" in response:
             raise ValueError(response["error"])
 
-        return response['result']
+        raise Exception("Unable to parse method:{} params:{} result:{}".format(method, params, response))
 
     def request_async(self, raw_method, raw_params):
         request_id = uuid.uuid4()
