@@ -2,8 +2,7 @@ import uuid
 import warnings
 
 from eth_utils import (
-    is_list_like,
-)
+    is_list_like, )
 
 from web3.exceptions import (
     CannotHandleRequest,
@@ -15,14 +14,11 @@ from web3.middleware import (
 )
 
 from web3.utils.compat import (
-    spawn,
-)
+    spawn, )
 from web3.utils.datastructures import (
-    NamedElementStack,
-)
+    NamedElementStack, )
 from web3.utils.decorators import (
-    deprecated_for,
-)
+    deprecated_for, )
 
 
 class RequestManager(object):
@@ -60,10 +56,10 @@ class RequestManager(object):
         self._providers = providers
 
     def setProvider(self, providers):
-        warnings.warn(DeprecationWarning(
-            "The `setProvider` API has been deprecated.  You should update your "
-            "code to directly set the `manager.provider` property."
-        ))
+        warnings.warn(
+            DeprecationWarning(
+                "The `setProvider` API has been deprecated.  You should update your "
+                "code to directly set the `manager.provider` property."))
         self.providers = providers
 
     #
@@ -71,7 +67,8 @@ class RequestManager(object):
     #
     def _make_request(self, method, params):
         for provider in self.providers:
-            request_func = provider.request_func(self.web3, tuple(self.middleware_stack))
+            request_func = provider.request_func(self.web3,
+                                                 tuple(self.middleware_stack))
             try:
                 return request_func(method, params)
             except CannotHandleRequest:
@@ -83,8 +80,7 @@ class RequestManager(object):
                 "params:{1}\n".format(
                     method,
                     params,
-                )
-            )
+                ))
 
     def request_blocking(self, method, params):
         """
@@ -92,10 +88,15 @@ class RequestManager(object):
         """
         response = self._make_request(method, params)
 
+        if "result" in response:
+            result = response['result']
+            return result
+
         if "error" in response:
             raise ValueError(response["error"])
 
-        return response['result']
+        raise Exception("Unable to parse method:{} params:{} result:{}".format(
+            method, params, response))
 
     def request_async(self, raw_method, raw_params):
         request_id = uuid.uuid4()
